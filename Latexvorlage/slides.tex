@@ -1,0 +1,89 @@
+\documentclass[%handout,
+11pt,a4paper,xcolor={usenames,dvipsnames}]{beamer}
+\setbeamertemplate{navigation symbols}{}
+\usepackage{lgdv/beamerthemetest}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subfig}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{listings}
+\usepackage{multicol}
+\usepackage{changepage}
+
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+
+\lstset{
+	basicstyle=\ttfamily\normalsize,
+	language=Python,
+	keywordstyle=\color{mygreen},
+	showspaces=false, 
+	showstringspaces=false, 
+	stringstyle=\color{mymauve},
+	commentstyle=\normalfont\color{mygray},
+	keepspaces=true,
+	columns=fullflexible,
+}
+\captionsetup[subfloat]{labelformat=empty} 
+\captionsetup[figure]{labelformat=empty}
+\captionsetup[table]{labelformat=empty}
+
+
+\setlength{\columnsep}{0.1cm}
+\setcounter{tocdepth}{2}
+
+\newcommand {\framedgraphic}[2]{
+     \begin{frame}
+         \frametitle{#1}
+         \begin{center}
+         \includegraphics[width=\textwidth,height=0.9\textheight,keepaspectratio]{#2}
+         \end{center}
+    \end{frame}
+}
+
+\newcommand {\bildc}[3]{
+         \begin{center}
+         \includegraphics[width=#1\textwidth,height=#2\textheight,keepaspectratio]{#3}
+         \end{center}
+}
+
+\newcommand {\bild}[1]{
+         \begin{center}
+         \includegraphics[width=0.8\textwidth,height=0.8\textheight,keepaspectratio]{#1}
+         \end{center}
+}
+
+%% Hier ändern
+\author{Teammitglied1, Teammitglied2}
+\date{Datum}
+
+
+\begin{document}
+	\begin{frame}[plain]	
+	\title{Informationsvisualisierung}
+    \subtitle{Übungspräsentation}
+		\titlepage
+	\end{frame}
+
+    %Ab hier ändern, Beispiel
+    \begin{frame}
+        \frametitle{Grafik}
+        \bild{Beispielbild.png}
+    \end{frame}
+    
+    \begin{frame}
+        \frametitle{Negative Aspekte}
+        %Aufzählung
+        \begin{itemize}
+            \item Zu bunt
+            \item Zu wenig bunt
+            \item Gefällt mir nicht
+        \end{itemize}
+    \end{frame}
+\end{document}
