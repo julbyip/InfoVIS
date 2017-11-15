@@ -162,6 +162,14 @@
         {
             return a.centrality - b.centrality;
         });
+        
+        var step = 2 * Math.PI / graph.nodes.length;
+        var i = 0;
+        graph.nodes.forEach(function (n) {
+            n.pos[0] = Math.cos(i);
+            n.pos[1] = Math.sin(i);
+            i += step;
+        }); 
     }
 
 
