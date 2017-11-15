@@ -69,7 +69,6 @@
             graph.nodes[n.src].degree++;
             graph.nodes[n.dst].degree++;
         });
-        // graph.nodes.forEach(function(n){console.log(n.id+": "+n.degree);});
 
         //DONE:: compute the minimum and maximum degree
         var min = Number.MAX_SAFE_INTEGER;
@@ -93,7 +92,6 @@
             else
                 n.centrality = n.degree / max; 
         });
-        graph.nodes.forEach(function(n){console.log(n.id+": "+n.degree+" cent:"+n.centrality+"  "+n.centrality*360);});
     }
 
 
@@ -113,10 +111,8 @@
         //DONE:: map the scalar centrality value linearily to a rainbow color map
         //       the color of the node should be a vec3    (see function  i9graph.hsv_to_rgb )
         graph.nodes.forEach(function (n) {
-            // n.radius =  Math.random()*.05 + .01;
             n.radius = n.centrality *.05 + .01;
             n.color = i9graph.hsv_to_rgb(n.centrality*360, 100, 100);
-            // n.color  =  vec3.fromValues( n.centrality*360, 0, 0);
         });
     }
 
@@ -156,7 +152,6 @@
         graph.nodes.forEach( function(n)
         {
             v.push(n);
-            console.log(n.centrality);
         })
         v.sort(function(a, b)
         {
@@ -164,12 +159,15 @@
         });
         
         var step = 2 * Math.PI / graph.nodes.length;
+        var x = 0;
         var i = 0;
-        graph.nodes.forEach(function (n) {
-            n.pos[0] = Math.cos(i);
-            n.pos[1] = Math.sin(i);
-            i += step;
-        }); 
+
+        for (i = 0; i < v.length; i++)
+        {
+            graph.nodes[v[i].id].pos[0] = Math.cos(x);
+            graph.nodes[v[i].id].pos[1] = Math.sin(x);
+            x += step;
+        }
     }
 
 
