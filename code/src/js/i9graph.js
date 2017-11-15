@@ -152,6 +152,7 @@
         //       - the nodes should consume space on the circle according to their size
         //       - adjust the radius of each node so that neighbouring nodes are nearly touching each other but do not overlap.
         var v = [];
+        var radius = 1;
         
         graph.nodes.forEach( function(n)
         {
@@ -163,13 +164,28 @@
             return a.centrality - b.centrality;
         });
         
-        var step = 2 * Math.PI / graph.nodes.length;
+        var umfang = 2 * Math.PI * radius;
+        var act_space = 0;
+        v.forEach(function(n) {
+            act_space += (2 * n.radius);
+        });
+
+        var mult = umfang/act_space; 
+        v.forEach(function(n) {
+            n.radius *= (mult);
+        });
+
+        //var step = 2 * Math.PI / graph.nodes.length;
         var i = 0;
-        graph.nodes.forEach(function (n) {
-            n.pos[0] = Math.cos(i);
-            n.pos[1] = Math.sin(i);
-            i += step;
-        }); 
+        for (var j = 0; j < v.length; j++) {
+            if (j != 0)
+                i += (v[j].radius);
+            v[j].pos[0] = Math.cos(i);
+            v[j].pos[1] = Math.sin(i);
+            i += (v[j].radius);            
+        }
+
+
     }
 
 
