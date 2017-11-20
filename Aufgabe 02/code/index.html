@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>i9GraphViz</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="src/css/offcanvas.css">
+
+
+    <!-- Note:    When working offline, you have to include the following scripts and stylesheets from a local folder -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.11.3/jquery-ui.min.js"></script>
+    <link href="https://code.jquery.com/ui/1.11.3/themes/smoothness/jquery-ui.css" rel="stylesheet" />
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://pixijs.download/v4.5.5/pixi.min.js"></script>
+</head>
+<body>
+
+    <script>
+        var require = require || undefined;
+        if (require !== undefined) var graph_addon = require('./build/Release/graph_addon');
+    </script>
+
+    <div id="divtextcontainer"> </div>
+
+    <nav id="navbar" class="navbar navbar-default collapse in" style="z-index: 3; margin-bottom: 0px;">
+        <ul class="nav">
+            <div class="container-fluid">
+                <div class="navbar-header">
+                    <a class="navbar-brand" href="#">i9GraphViz</a>
+                </div>
+                <ul class="nav navbar-nav">
+                    <li>
+                        <button type="button" class="btn btn-lg btn-default" data-toggle="modal" data-target="#fileOptions">File</button>
+                    </li>
+                    <li>
+                        <button type="button" class="btn btn-lg btn-default" data-toggle="modal" data-target="#layoutOptions">Layout</button>
+                    </li>
+                    <!-- <li> <button type="button" class="btn btn-lg btn-default" data-toggle="modal" data-target="#analyzeOptions">Analyze</button></li> -->
+                    <li>
+                        <button type="button" class="btn btn-lg btn-default" data-toggle="modal" data-target="#inspector">Inspect</button>
+                    </li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    <button type="button" class="btn btn-lg btn-default" data-toggle="modal" data-target="#renderOptions">Render</button>
+                </ul>
+            </div>
+        </ul>
+    </nav>
+
+    <div class="modal fade" id="renderOptions" tabindex="-1" data-backdrop="false" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-wrap">
+                    <div class="modal-header" style="background-color: rgb(233, 208, 196)">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        <h4 class="modal-title">Render</h4>
+                    </div>
+                    <div class="modal-body">
+                        <button type="button" class="btn btn-default" style="width:100%" onclick="i9graph.centerCamera();">Center Camera</button>
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" value="" onclick="i9graph.toggleEdges();">Simple Edges (faster rendering)</label>
+                        </div>
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" value="" onclick="i9graph.toggleTheme();">Theme Dark</label>
+                        </div>
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" value="" onclick="i9graph.toggleGrid();">Show Grid #</label>
+                        </div>
+                        Node Size
+                        <input id="nodesize" oninput="i9graph.nodeSizeFromSlider();" type="range" min="-100" max="100"
+                            value="0" class="slider"> Edge Size
+                        <input id="edgesize" oninput="i9graph.edgeSizeFromSlider();" type="range" min="-100" max="100"
+                            value="0" class="slider"> Edge Detail
+                        <input id="edgedetail" oninput="i9graph.edgeDetailFromSlider();" type="range" min="0"
+                            max="8" value="5" class="slider">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" onclick="i9graph.resetRenderOptions();">Reset to Default</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal fade" id="layoutOptions" tabindex="-1" data-backdrop="false" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-wrap">
+                    <div class="modal-header" style="background-color: rgb(199, 233, 196)">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        <h4 class="modal-title">Layout</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="dropdown">
+                            <button class="btn dropdown-toggle" type="button" style="width:100%" data-toggle="dropdown">
+                                <span id="layoutName">select Layout</span>
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a href="#" onclick="i9graph.setLayout('random');">Random</a></li>
+                                <li><a href="#" onclick="i9graph.setLayout('circular');">Circular</a></li>
+                                <li><a href="#" onclick="i9graph.setLayout('animatedRandom');">Animated Random</a></li>
+
+                                <!-- TODO:  Create dropdown Item  Fruchtermann -->
+
+
+                                
+
+
+                            </ul>
+                        </div>
+                        <button type="button" class="btn btn-default" style="width:100%" onclick="i9graph.restartLayout();">Recompute Layout</button>
+                        <div id="layout-options">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="fileOptions" tabindex="-1" data-backdrop="false" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-wrap">
+                    <div class="modal-header" style="background-color: rgb(196, 210, 233)">
+                        <button type="button" class="close" data-dismiss="modal">
+                            <span>&times;</span>
+                        </button>
+                        <h4 class="modal-title">File</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row" style="padding:inherit;">
+                            <button type="button" class="btn btn-default col-sm-4" onclick="{i9graph.appendFile=false; document.getElementById('open-file').click(); return false;}">Open</button>
+                            <button type="button" class="btn btn-default col-sm-4" onclick="{i9graph.appendFile=true; document.getElementById('open-file').click(); return false;}">Append</button>
+                            <button type="button" class="btn btn-default col-sm-4" onclick="{i9graph.clearGraph();}">Clear</button>
+                        </div>
+                        <span>Add Random Nodes:</span>
+                        <div class="row" style="padding:inherit;">
+                            <button type="button" class="btn btn-default col-sm-4" onclick="i9graph.addRandomNodes(10);">+10</button>
+                            <button type="button" class="btn btn-default col-sm-4" onclick="i9graph.addRandomNodes(100);">+100</button>
+                            <button type="button" class="btn btn-default col-sm-4" onclick="i9graph.addRandomNodes(1000);">+1000</button>
+                        </div>
+                        <p id="status-text">Graph Status</p>
+                        <!-- <p>File:</p> -->
+                        <p id="Filename"></p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="analyzeOptions" tabindex="-1" data-backdrop="false" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-wrap">
+                    <div class="modal-header" style="background-color: rgb(232, 233, 196)">
+                        <button type="button" class="close" data-dismiss="modal">
+                            <span>&times;</span>
+                        </button>
+                        <h4 class="modal-title">Analyze</h4>
+                    </div>
+                    <div class="modal-body">
+                        <h4>Centrality</h4>
+                        <div class="row" style="padding:inherit;">
+                            <button type="button" class="btn btn-default col-sm-4" onclick="i9graph.setCentrality('degree');">Degree</button>
+                        </div>
+                        <h4>Community</h4>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal fade" id="inspector" tabindex="-1" data-backdrop="false" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+
+                <div class="modal-wrap">
+                    <div class="modal-header" style="background-color: rgb(196, 228, 233)">
+                        <button type="button" class="close" data-dismiss="modal">
+                            <span>&times;</span>
+                        </button>
+                        <h4 class="modal-title">Node Inspector</h4>
+                    </div>
+                    <div class="modal-body inline" id="inspector-body"></div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+    <script>
+            $('.modal-content').resizable({
+                    maxHeight: 800,
+                    maxWidth: 1600,
+            });
+
+            $('.modal-content').draggable({
+                containment: "window"
+            });
+    </script>
+
+    <span id="menubtn" style="font-size:32px; margin-top: 5px; margin-left: 5px; cursor: hand; z-index: 5;" class="glyphicon glyphicon-menu-hamburger"
+        data-toggle="collapse" data-target="#navbar"></span>
+
+    <div id="graphStat"></div>
+    <div id="modularity-ui"></div>
+    <input type="file" accept=".gml,.gexf,graphml,.i9g,.ldjson" id="open-file" name="open file" style="visibility: hidden; width: 1px;height: 1px"
+        multiple />
+
+    <script src="src/js/gl-matrix-min.js"></script>
+    <script src="src/js/i9graph_definition.js"></script>
+    <script src="src/js/i9graph_fileloader.js"></script>
+    <script src="src/js/i9graph_renderer.js"></script>
+    <script src="src/js/i9graph_util.js"></script>
+    <script src="src/js/i9graph.js"></script>
+
+    <script>
+        document.getElementById('open-file').addEventListener('change', i9graph.readFiles, false);
+        TEXT.initialize();
+    </script>
+
+</body>
+
+</html>
