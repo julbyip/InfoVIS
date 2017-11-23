@@ -166,12 +166,87 @@
 
     // TODO:: implement the namespace  i9graph.layout.fruchtermann 
     //  - use the implementation pattern of the   i9graph.layout.animatedRandom  namespace
-    //  - options property:  should contain several values, that can be manipulated by the user
-    //                          i.e. cooling_factor or initial_max_displacement
-    //  - start method:  should initialize the algorithm
-    //  - update method: should perform one iteration of the force based fruchtermann algorithm
-    //                   update should return true, if the algorithm is finished (false otherwise)
 
+    i9graph.layout.fruchtermann = new (function(){
+        var layout = this;
+
+        // the framework forwards the 'options' of a layout to the GUI
+        //  - options property:  should contain several values, that can be manipulated by the user
+        //  i.e. cooling_factor or initial_max_displacement
+        this.options = {
+            limit: 10,
+            temperature: 0,
+            cooling_factor: 1, // change later
+            initial_max_displacement: 0 // change
+        };
+
+        // The start function is called once, when the layout is selected, or recomputed
+        //  - start method:  should initialize the algorithm
+        var area = 0;
+        var k = 0;
+
+        this.start = function (graph) {
+            layout.move = layout.options.initial_max_displacement;
+            area = screen.width * screen.height;
+            k = Math.sqrt(area/graph.nodes.length);
+        };
+
+        function f_a(d) {
+            return Math.pow(d,2) / k;
+        }; 
+        
+        function f_r(d) {
+            return Math.pow(k,2) / d;
+        };  
+
+
+        // The update function is called every frame, until it returnes true;
+        //  - update method: should perform one iteration of the force based fruchtermann algorithm
+        //      update should return true, if the algorithm is finished (false otherwise)
+        this.update = function (graph){
+
+            console.log("update");
+
+            var disp = [];
+            var delta = 0;
+
+            // Repulsive forces
+            graph.nodes.forEach(function(v){
+                disp[v] = 0;
+
+                graph.nodes.forEach(function(u)
+                {
+                    if (u.id != v.id) {
+                        delta = Math.sqrt(Math.pow(v.pos[0] - u.pos[0],2)+Math.pow(v.pos[1] - u.pos[1],2));
+                        disp[v] = disp[v] + (delta / Math.abs(delta)) * f_r(Math.abs(delta));
+                    }
+                });
+
+            });
+
+            // Attractive forces
+            //e.v = e.src e.u = e.dst
+            graph.edges.forEach (function(e)
+            {
+                // console.log("Test: "+graph.nodes[e.src].pos[0]);
+                delta = Math.sqrt(Math.pow(graph.nodes[e.src].pos[0] - graph.nodes[e.dst].pos[0],2)+Math.pow(graph.nodes[e.src].pos[1] - graph.nodes[e.dst].pos[1],2));
+                disp[e.src] = disp[e.src] + (delta / Math.abs(delta)) * f_a(Math.abs(delta));
+                disp[e.dst] = disp[e.dst] + (delta / Math.abs(delta)) * f_a(Math.abs(delta));
+            });
+
+
+            graph.nodes.forEach(function(n){
+                n.pos[0] += (disp[n] / Math.abs(disp[n]) * Math.min(disp[n], layout.options.temperature));
+                n.pos[1] += (disp[n] / Math.abs(disp[n]) * Math.min(disp[n], layout.options.temperature));
+
+                n.pos[0] = Math.min(screen.width/2, Math.max(-screen.width/2, n.pos[0]));
+                n.pos[1] = Math.min(screen.height/2, Math.max(-screen.height/2, n.pos[1]));
+            });
+            layout.move *= 0.98;
+            layout.options.temperature -= layout.options.cooling_factor;
+            return layout.options.limit < layout.options.temperature;
+        };
+    })();
 
 
 
