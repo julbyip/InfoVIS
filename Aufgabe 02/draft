@@ -1,0 +1,52 @@
+2.1
+============================
+Kamada-Kawaii
+- desirable geometric (Euclidean) distance between 2 vertices in the
+drawing  as the graph theoretic distance
+- reduction of edges crossing not to be a good criterion
+- symmetrical drawn as symmetric: valuable characteristic of structures
+- total balance of layouts: equal or more importante than edges crossing
+reduction
+- total balance condition is formulated as the square summation of
+the differences between desirable distances and real ones for all pair
+of vertices
+- balanced layout: dynamically ballenced spring system
+- pleasing layout: decreasing the total energy of the springs
+
+Fruchtermann-Reingold
+-> Principles:
+	1. vertices connected by a edge should be drawn near each other
+	2.  vertices shouldn't be drawn too close each other
+- vertices behave as atomic or celestial bodies (force, laws...)
+- algorithm resemble molecular/planetary simulations (n-body problems)
+- no inicial configuration, vertices places randomly
+
+
+->>> compare how the distance in both algorithms works
+======= KK =======
+	lij = L x dij
+dij: between vi and vj in a graph is defined as the lenght
+of the shortest paths between vi and vj
+L: desirable length of a single edge in the display plane
+
+======= FR ========
+	k = C x sqrt(area / n vertices)
+C: constant found experimentally
+
+- distribut vertices uniformly in the frame
+k: radius of the empty area around a vertex
+
+->>> computational cost
+======= KK =======
+dij: O(n^3)
+while loop: O(T x n) 	T: total number of inner loops
+
+======= FR =======
+basic algorithm: O (|V|^2 + |E|)
+grid variant: O (|V| + |E|)
+
+=========================================
+
+Ask about 2.2
+=======================================
+
