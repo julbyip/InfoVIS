@@ -189,8 +189,10 @@
             graph.nodes.forEach(function(n){
                  n.pos[0] = Math.random() * 2 - 1;
                  n.pos[1] = Math.random() * 2 - 1;
+
             });
-            area = screen.width * screen.height;
+            area = 2;
+            //console.log("area " + area + " screen.width "+innerWidth);
             k = Math.sqrt(area/graph.nodes.length);
         };
 
@@ -199,7 +201,7 @@
         }; 
         
         function f_r(d) {
-            return Math.pow(k,2) / d;
+            return (Math.pow(k, 2) * -1)/ d;
         };  
 
 
@@ -208,6 +210,7 @@
         //      update should return true, if the algorithm is finished (false otherwise)
         this.update = function (graph){
 
+
             console.log("update");
 
             var disp = [];
@@ -215,40 +218,37 @@
 
             // Repulsive forces
             graph.nodes.forEach(function(v){
-                disp[v] = vec2.create(0,0);
-
-                graph.nodes.forEach(function(u)
-                {
+                disp[v.id] = vec2.create(0,0);
+                graph.nodes.forEach(function(u) {
                     if (u.id != v.id) {
                         delta = sub(v.pos, u.pos);
-                        disp[v] = add (disp[v], (normalize(delta) * f_r(len(delta))));
+                        disp[v.id] = add (disp[v.id], scale(normalize(delta), f_r(len(delta))));
+
                     }
                 });
 
             });
-
             // Attractive forces
             //e.v = e.src e.u = e.dst
             graph.edges.forEach (function(e)
             {
-                // console.log("Test: "+graph.nodes[e.src].pos[0]);
                 delta = sub(graph.nodes[e.src].pos, graph.nodes[e.dst].pos);
-                disp[graph.nodes[e.src]] = add(disp[graph.nodes[e.src]], (normalize(delta) * f_a(len(delta))));
-                disp[graph.nodes[e.dst]] = add(disp[graph.nodes[e.dst]], (normalize(delta) * f_a(len(delta))));
-
+                disp[e.src] = add(disp[e.src], scale(normalize(delta), f_a(len(delta))));
+                disp[e.dst] = add(disp[e.dst], scale(normalize(delta), f_a(len(delta))));              
             });
 
+             
 
             graph.nodes.forEach(function(n){
-                n.pos = add (n.pos, normalize(n.pos) * Math.min(len(disp[n]), layout.options.temperature));
+                n.pos = add (n.pos, normalize(n.pos) * Math.min(normalize(disp[n.id]), layout.options.temperature));
 
                 n.pos[0] = Math.min(screen.width/2, Math.max(-screen.width/2, n.pos[0]));
                 n.pos[1] = Math.min(screen.height/2, Math.max(-screen.height/2, n.pos[1]));
             });
     
             layout.options.temperature -= layout.options.cooling_factor;
-            return layout.options.limit < layout.options.temperature;*/
-        }; 
+            return layout.options.limit < layout.options.temperature; 
+    }; 
     })();
 
 
