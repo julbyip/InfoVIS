@@ -186,7 +186,10 @@
         var k = 0;
 
         this.start = function (graph) {
-            layout.move = layout.options.initial_max_displacement;
+            graph.nodes.forEach(function(n){
+                 n.pos[0] = Math.random() * 2 - 1;
+                 n.pos[1] = Math.random() * 2 - 1;
+            });
             area = screen.width * screen.height;
             k = Math.sqrt(area/graph.nodes.length);
         };
@@ -208,17 +211,17 @@
             console.log("update");
 
             var disp = [];
-            var delta = 0;
+            var delta;
 
             // Repulsive forces
             graph.nodes.forEach(function(v){
-                disp[v] = 0;
+                disp[v] = vec2.create(0,0);
 
                 graph.nodes.forEach(function(u)
                 {
                     if (u.id != v.id) {
-                        delta = Math.sqrt(Math.pow(v.pos[0] - u.pos[0],2)+Math.pow(v.pos[1] - u.pos[1],2));
-                        disp[v] = disp[v] + (delta / Math.abs(delta)) * f_r(Math.abs(delta));
+                        delta = sub(v.pos, u.pos);
+                        disp[v] = add (disp[v], (normalize(delta) * f_r(len(delta))));
                     }
                 });
 
@@ -229,23 +232,23 @@
             graph.edges.forEach (function(e)
             {
                 // console.log("Test: "+graph.nodes[e.src].pos[0]);
-                delta = Math.sqrt(Math.pow(graph.nodes[e.src].pos[0] - graph.nodes[e.dst].pos[0],2)+Math.pow(graph.nodes[e.src].pos[1] - graph.nodes[e.dst].pos[1],2));
-                disp[e.src] = disp[e.src] + (delta / Math.abs(delta)) * f_a(Math.abs(delta));
-                disp[e.dst] = disp[e.dst] + (delta / Math.abs(delta)) * f_a(Math.abs(delta));
+                delta = sub(graph.nodes[e.src].pos, graph.nodes[e.dst].pos);
+                disp[graph.nodes[e.src]] = add(disp[graph.nodes[e.src]], (normalize(delta) * f_a(len(delta))));
+                disp[graph.nodes[e.dst]] = add(disp[graph.nodes[e.dst]], (normalize(delta) * f_a(len(delta))));
+
             });
 
 
             graph.nodes.forEach(function(n){
-                n.pos[0] += (disp[n] / Math.abs(disp[n]) * Math.min(disp[n], layout.options.temperature));
-                n.pos[1] += (disp[n] / Math.abs(disp[n]) * Math.min(disp[n], layout.options.temperature));
+                n.pos = add (n.pos, normalize(n.pos) * Math.min(len(disp[n]), layout.options.temperature));
 
                 n.pos[0] = Math.min(screen.width/2, Math.max(-screen.width/2, n.pos[0]));
                 n.pos[1] = Math.min(screen.height/2, Math.max(-screen.height/2, n.pos[1]));
             });
-            layout.move *= 0.98;
+    
             layout.options.temperature -= layout.options.cooling_factor;
-            return layout.options.limit < layout.options.temperature;
-        };
+            return layout.options.limit < layout.options.temperature;*/
+        }; 
     })();
 
 
