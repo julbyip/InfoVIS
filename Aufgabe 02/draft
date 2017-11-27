@@ -47,6 +47,11 @@ grid variant: O (|V| + |E|)
 
 =========================================
 
-Ask about 2.2
+2.2
+- 3D model
+- Layout without edge crossing (reduce, layout independe)
+- Different models of the same graph for complementar informations
+	- one simplified graph that suppose to be an overview of the completed graph for a better understardanding
+	- completed graph that gives all the information for a deeper analisation
 =======================================
 
