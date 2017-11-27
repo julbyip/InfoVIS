@@ -174,32 +174,34 @@
         //  - options property:  should contain several values, that can be manipulated by the user
         //  i.e. cooling_factor or initial_max_displacement
         this.options = {
-            limit: 0.1,
-            temperature: 0.8,
-            cooling_factor: 0.1, 
-            initial_max_displacement: 0.1 
+            limit: 0,
+            temperature: 15,
+            cooling_factor: 1, 
+            initial_max_displacement: 0.1 // change
         };
 
         // The start function is called once, when the layout is selected, or recomputed
         //  - start method:  should initialize the algorithm
-        var area = 4;
+        var area = 0;
         var k = 0;
-
         this.start = function (graph) {
             graph.nodes.forEach(function(n){
                  n.pos[0] = Math.random() * 2 - 1;
                  n.pos[1] = Math.random() * 2 - 1;
+
             });
+            area = 4;
             k = Math.sqrt(area/graph.nodes.length);
         };
 
         function f_a(d) {
-            return Math.pow(d,2) / k;
+            return Math.pow(d, 2) / k;
         }; 
         
         function f_r(d) {
             return Math.pow(k, 2)/ d;
         };  
+
 
         // The update function is called every frame, until it returnes true;
         //  - update method: should perform one iteration of the force based fruchtermann algorithm
@@ -218,28 +220,43 @@
                 graph.nodes.forEach(function(u) {
                     if (u.id != v.id) {
                         delta = sub(v.pos, u.pos);
-                        disp[v.id] = add (disp[v.id], (scale(normalize(delta), f_r(len(delta)))));
+                        disp[v.id] = add (disp[v.id], scale(normalize(delta), f_r(len(delta))));
                     }
+
                 });
+                console.log("For id "+v.id+" disp = "+disp[v.id]);
+
             });
             // Attractive forces
             //e.v = e.src e.u = e.dst
             graph.edges.forEach (function(e)
             {
-                delta = sub(graph.nodes[e.src].pos, graph.nodes[e.dst].pos);
-                disp[e.src] = sub(disp[e.src], (scale(normalize(delta), f_a(len(delta)))));
-                disp[e.dst] = add(disp[e.dst], (scale(normalize(delta), f_a(len(delta)))));         
+                if(e.src != e.dst) {
+                    delta = sub(graph.nodes[e.src].pos, graph.nodes[e.dst].pos);
+                    disp[e.src] = sub(disp[e.src], scale(normalize(delta), f_r(len(delta))));
+                    disp[e.dst] = add(disp[e.dst], scale(normalize(delta), f_r(len(delta))));
+   
+                }
             });
 
-             
 
             graph.nodes.forEach(function(n){
-                n.pos = add(n.pos, scale(normalize(n.pos), Math.min(len(disp[n.id]), layout.options.temperature)));
+                if (disp[n.id].x > layout.options.inital_max_displacement) {
+                    disp[n.id].x = layout.options.inital_max_displacement;
+                    console.log("reseted disp");
+                } 
+                if (disp[n.id].y > layout.options.inital_max_displacement) {
+                    disp[n.id].y = layout.options.inital_max_displacement;
+                    console.log("reseted disp");
+                } 
+
+            console.log(disp[n.id]); 
+                n.pos = add (n.pos, scale(normalize(n.pos), Math.min(len(disp[n.id]), layout.options.temperature)));
                 n.pos[0] = Math.min(1, Math.max(-1, n.pos[0]));
                 n.pos[1] = Math.min(1, Math.max(-1, n.pos[1]));
-            });  
+            });
+            
             layout.options.temperature -= layout.options.cooling_factor;
-    
             return (layout.options.limit >= layout.options.temperature); 
     }; 
     })();
