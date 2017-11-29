@@ -175,9 +175,9 @@
         //  i.e. cooling_factor or initial_max_displacement
         this.options = {
             limit: 0,
-            temperature: 15,
-            cooling_factor: 1, 
-            initial_max_displacement: 0.1 // change
+            temperature: 0.9,
+            cooling_factor: 0.1, 
+            initial_max_displacement: 0.01 // change
         };
 
         // The start function is called once, when the layout is selected, or recomputed
@@ -199,65 +199,70 @@
         }; 
         
         function f_r(d) {
-            return Math.pow(k, 2)/ d;
+            return -Math.pow(k, 2)/ d;
         };  
 
 
         // The update function is called every frame, until it returnes true;
         //  - update method: should perform one iteration of the force based fruchtermann algorithm
         //      update should return true, if the algorithm is finished (false otherwise)
-        this.update = function (graph){
-
-
+        this.update = function (graph){    
             console.log("update");
+            if ((layout.options.temperature-layout.options.cooling_factor) <= layout.options.limit) {
+                return true;
+            }
+            else
+            {                
+                var disp = [];
+                var delta;
 
-            var disp = [];
-            var delta;
+                    // Repulsive forces
+                graph.nodes.forEach(function(v){
+                    disp[v.id] = vec2.create(0,0);
+                    graph.nodes.forEach(function(u) {
+                        if (u.id != v.id) {
+                            delta = sub(v.pos, u.pos);
+                            if (len(delta) >= Number.MIN_VALUE) {
+                                disp[v.id] = add (disp[v.id], scale(normalize(delta), f_r(len(delta))));
+                            }
+                            // console.log("add delta: "+delta);
+                        }
 
-            // Repulsive forces
-            graph.nodes.forEach(function(v){
-                disp[v.id] = vec2.create(0,0);
-                graph.nodes.forEach(function(u) {
-                    if (u.id != v.id) {
-                        delta = sub(v.pos, u.pos);
-                        disp[v.id] = add (disp[v.id], scale(normalize(delta), f_r(len(delta))));
-                    }
+                    });
+                    // console.log("For id "+v.id+" disp = "+disp[v.id]);
 
                 });
-                console.log("For id "+v.id+" disp = "+disp[v.id]);
-
-            });
-            // Attractive forces
-            //e.v = e.src e.u = e.dst
-            graph.edges.forEach (function(e)
-            {
-                if(e.src != e.dst) {
-                    delta = sub(graph.nodes[e.src].pos, graph.nodes[e.dst].pos);
-                    disp[e.src] = sub(disp[e.src], scale(normalize(delta), f_r(len(delta))));
-                    disp[e.dst] = add(disp[e.dst], scale(normalize(delta), f_r(len(delta))));
-   
-                }
-            });
+                // Attractive forces
+                //e.v = e.src e.u = e.dst
+                graph.edges.forEach (function(e)
+                {
+                    if(e.src != e.dst) {
+                        delta = sub(graph.nodes[e.src].pos, graph.nodes[e.dst].pos);
+                        disp[e.src] = sub(disp[e.src], scale(normalize(delta), f_a(len(delta))));
+                        disp[e.dst] = add(disp[e.dst], scale(normalize(delta), f_a(len(delta))));
+                    }
+                });
 
 
-            graph.nodes.forEach(function(n){
-                if (disp[n.id].x > layout.options.inital_max_displacement) {
-                    disp[n.id].x = layout.options.inital_max_displacement;
-                    console.log("reseted disp");
-                } 
-                if (disp[n.id].y > layout.options.inital_max_displacement) {
-                    disp[n.id].y = layout.options.inital_max_displacement;
-                    console.log("reseted disp");
-                } 
+                graph.nodes.forEach(function(n){
+                    if (disp[n.id].x > layout.options.inital_max_displacement) {
+                        disp[n.id].x = layout.options.inital_max_displacement;
+                        // console.log("reseted disp");
+                    } 
+                    if (disp[n.id].y > layout.options.inital_max_displacement) {
+                        disp[n.id].y = layout.options.inital_max_displacement;
+                        // console.log("reseted disp");
+                    } 
 
-            console.log(disp[n.id]); 
-                n.pos = add (n.pos, scale(normalize(n.pos), Math.min(len(disp[n.id]), layout.options.temperature)));
-                n.pos[0] = Math.min(1, Math.max(-1, n.pos[0]));
-                n.pos[1] = Math.min(1, Math.max(-1, n.pos[1]));
-            });
-            
-            layout.options.temperature -= layout.options.cooling_factor;
-            return (layout.options.limit >= layout.options.temperature); 
+                // console.log(disp[n.id]); 
+                    n.pos = add (n.pos, scale(normalize(n.pos), Math.min(len(disp[n.id]), layout.options.temperature)));
+                    n.pos[0] = Math.min(1, Math.max(-1, n.pos[0]));
+                    n.pos[1] = Math.min(1, Math.max(-1, n.pos[1]));
+                });
+                
+                layout.options.temperature -= layout.options.cooling_factor;
+                console.log("Temperature: "+layout.options.temperature);
+                return (false)};
     }; 
     })();
 
