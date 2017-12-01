@@ -245,12 +245,12 @@
 
 
                 graph.nodes.forEach(function(n){
-                    if (disp[n.id].x > layout.options.inital_max_displacement) {
-                        disp[n.id].x = layout.options.inital_max_displacement;
+                    if (disp[n.id].[0] > layout.options.inital_max_displacement) {
+                        disp[n.id].[0] = layout.options.inital_max_displacement;
                         // console.log("reseted disp");
                     } 
-                    if (disp[n.id].y > layout.options.inital_max_displacement) {
-                        disp[n.id].y = layout.options.inital_max_displacement;
+                    if (disp[n.id].[1] > layout.options.inital_max_displacement) {
+                        disp[n.id].[1] = layout.options.inital_max_displacement;
                         // console.log("reseted disp");
                     } 
 
