@@ -10,7 +10,7 @@ reduction
 - total balance condition is formulated as the square summation of
 the differences between desirable distances and real ones for all pair
 of vertices
-- balanced layout: dynamically ballenced spring system
+- balanced layout: dynamically balanced spring system
 - pleasing layout: decreasing the total energy of the springs
 
 Fruchtermann-Reingold
