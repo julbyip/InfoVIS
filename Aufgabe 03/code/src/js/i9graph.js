@@ -233,7 +233,7 @@
                 var v = graph.nodes[e.dst];
                 if (u.id == v.id) return;
                 var delta = sub(v.pos, u.pos);
-                var movement = scale(normalize(delta), attractiveForce(len(delta)) - repulsiveForce(len(delta)))/;
+                var movement = scale(normalize(delta), attractiveForce(len(delta)) - repulsiveForce(len(delta)));
                 u.displace = add(u.displace, movement);
                 v.displace = add(v.displace, scale(movement, -1));
             });
@@ -283,10 +283,67 @@
         var attractiveForce = function (dist) { return dist * dist; }
         var max_displacement = 0;
 
-        var ages = [][];
-        var rem = [];
-        var del = [];
-        var add = [];
+        function Array2D(nodes) {
+          var arr = [];
+
+          for (var i=0;i<nodes;i++) {
+             arr[i] = [];
+          }
+          return arr;
+        }
+
+        var old_time;
+        var ages;
+        var v_rem = [];
+        var v_del = [];
+        var v_add = [];
+
+        function is_visible (n, t) {
+            return (n.activity[0].start <= (i9graph.animationTime - t) && n.activity[0].end >= (i9graph.animationTime - t)) 
+        }
+
+        function age_rem (graph, t) { // remaining neighbours
+            graph.nodes.forEach(function (n) {
+                v_rem[n.id] = 0;
+                graph.adjList[n.id].forEach(function (v) { // should be the neigbours of n?
+                    // v is visible now and must have been visible  at t-1
+                    if (v.visible && is_visible(n, t-1)) {
+                        v_rem[n.id] += ages[v.id][t-1];
+                    }
+                });                
+            });
+        }
+
+        function age_del (graph, t) { // deleted neighbours
+            graph.nodes.forEach(function (n) {
+                v_del[n.id] = 0;
+                graph.adjList[n.id].forEach(function (v) { // should be the neigbours of n?
+                    // v is not visible now and must have been visible  at t-1
+                    if ((!v.visible) && is_visible(n, t-1)) {
+                        v_del[n.id] += ages[v.id][t-1];
+                    }
+                }); 
+            });
+        }
+
+        function age_add(graph, t) { // added neighbours
+            graph.nodes.forEach(function (n) {
+                v_add[n.id] = 0;
+                graph.adjList[n.id].forEach(function (v) { // should be the neigbours of n?
+                    // v is  visible now and not visible  at t-1
+                    if (v.visible && !(is_visible (n, t-1))) {
+                        v_add[n.id] += ages[v.id][t-1];
+                    }
+                }); 
+            });
+        }
+
+        function has_neighbours (graph, n) {
+            graph.adjList[n.id].forEach(function (v) { // should be the neigbours of n?
+                    if (v.visible) { return true; }
+            });
+            return false;    
+        }
 
         // The start function is called once, when the layout is selected, or recomputed
         // Start as the Fruchtermann layout
@@ -298,15 +355,76 @@
             attractiveForce = function (dist) { return dist * dist / k; }
             max_displacement = layout.options.max_displacement;
             // putting the age in a matrix nodes X time
-            graph.nodes.forEach(function(n) { ages[n.id][0] = n.age});
+            console.log("len" + graph.nodes.length);
+            ages = Array2D(graph.nodes.length);
+            graph.nodes.forEach(function(n) { ages[n.id][0] = 0});
+            old_time = i9graph.animationTime;
         };
 
         // The update function is called every frame;
         this.update = function (graph) {
+            graph.nodes.forEach(function (v) {
+                v.displace = scale(sub(vec2.fromValues(0, 0), v.pos), .1);
 
-        
+                graph.nodes.forEach(function (u) {
+                    if (u.id != v.id) {
+                        var delta = sub(v.pos, u.pos);
+                        v.displace = add(v.displace, scale(normalize(delta), repulsiveForce(len(delta))));
+                    }
+                });
+            });
 
-            return false;
+            graph.edges.forEach(function (e) {
+                var u = graph.nodes[e.src];
+                var v = graph.nodes[e.dst];
+                if (u.id == v.id) return;
+                var delta = sub(v.pos, u.pos);
+                var movement = scale(normalize(delta), attractiveForce(len(delta)) - repulsiveForce(len(delta)));
+                u.displace = add(u.displace, movement);
+                v.displace = add(v.displace, scale(movement, -1));
+            });
+
+            graph.nodes.forEach(function (v) {
+                if (len(v.displace) > 0.000001) {
+                    v.pos = add(v.pos,
+                        scale(normalize(v.displace),
+                            Math.min(max_displacement, max_displacement * len(v.displace)) * Math.random()));
+                }
+                // stay inside area
+                v.pos[0] = Math.max(-1, Math.min(1, v.pos[0]));
+                v.pos[1] = Math.max(-1, Math.min(1, v.pos[1]));
+            });
+
+            if (i9graph.animationTime != old_time) {
+                console.log("animationTime " + i9graph.animationTime);
+                //calculate new age for every node
+                age_rem(graph, i9graph.animationTime);
+                age_del(graph, i9graph.animationTime);
+
+                age_add(graph, i9graph.animationTime);
+           
+
+                graph.nodes.forEach(function (n) {
+                    if (n.visible) {
+                        console.log("n.visible : "+ n.visible);
+                        if (has_neighbours(graph, n)) {
+                            console.log("use case 1");
+                            var tot = rem[n.id] + del[n.id] + add[n.id];
+                            ages[n.id][i9graph.animationTime] = ages[n.id][old_time] * (rem[n.id]/tot) + 1; // round it?   
+                        } else {
+                            ages[n.id][i9graph.animationTime] = ages[n.id][old_time] + 1;
+                        }  
+                    } else {
+                        ages[n.id][i9graph.animationTime] = ages[n.id][old_time];
+                    }
+                    n.age = ages[n.id][i9graph.animationTime];
+
+                   console.log("node "+n.id+" has age "+ n.age);  
+                });
+                old_time = i9graph.animationTime;
+
+            }
+
         };
     })();
 
