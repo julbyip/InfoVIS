@@ -33,6 +33,7 @@
         graph.nodes.forEach(function (n) {
             if (!n.visible) return;
             n.measure[measureName] = (n.measure[measureName] - min) / (max - min);
+            // console.log("n.age: "+n.age+" n.measure: "+n.measure[measureName]);
         });
     }
 
@@ -72,9 +73,19 @@
         // TODO::  any measure stored in the measure property can be selected in the GUI to choose the color or size of a node from.
         //     implement an intuitive mapping from the age of the node  to this centrality measure ( again in [0,1]  )
         //  a centrality of 1 for example equals red color, whereas 0 equals blue.
-
+        console.log("age");
         graph.nodes.forEach(function(n){
-            n.measure[measureName] = Math.random();
+        	if (n.visible)
+            		n.measure[measureName] = n.age;
+        });
+        i9graph.normalizeMeasure(measureName, graph);
+        graph.nodes.forEach(function(n) {
+        	if (n.visible){
+        	        	n.centrality = n.measure[measureName];
+        	        	// console.log("centrality: "+n.centrality+n.visible);
+	        	n.color = i9graph.hsv_to_rgb(n.centrality*360, 90, 90);
+	        	console.log("age: "+n.age+" color: "+n.centrality*360);
+	        }
         });
     };
 
@@ -82,12 +93,12 @@
 
 
     i9graph.determineGraphVisibility = function (graph) {
-        // DONE::  set the 'visible' property 
+        // DONE::  set the 'visible' property
         //      of all nodes and edges  of the graph
         //      according to:
         //          - their activity[{start,end}] property,
         //          - and the  'i9graph.animationTime'  'i9graph.animationFrame'
-        //      everything active anywhere between animationTime and animationTime+Frame should be visible    
+        //      everything active anywhere between animationTime and animationTime+Frame should be visible
         //  Note::  The graph-files alow the presence of edges without their linked nodes.
         //          In this application, an edge should only be visible when both nodes are.
         //  Note:: this Function is called by the Framework everytime the animationTime changes.
@@ -133,7 +144,7 @@
      * @function circular
      * @memberof i9graph.layout
      * @description the nodes are placed on a circle of radius 1 around the center of the drawing area (0,0).
-     * The nodes are sorted by their centrality.  
+     * The nodes are sorted by their centrality.
      */
     i9graph.layout.circular = function (graph) {
         var totalValue = 0;
@@ -299,7 +310,7 @@
         var v_add = [];
 
         function is_visible (n, t) {
-            return (n.activity[0].start <= (i9graph.animationTime - t) && n.activity[0].end >= (i9graph.animationTime - t)) 
+            return (n.activity[0].start <= (i9graph.animationTime - t) && n.activity[0].end >= (i9graph.animationTime - t))
         }
 
         function age_rem (graph, t) { // remaining neighbours
@@ -310,7 +321,7 @@
                     if (v.visible && is_visible(n, t-1)) {
                         v_rem[n.id] += ages[v.id][t-1];
                     }
-                });                
+                });
             });
         }
 
@@ -322,7 +333,7 @@
                     if ((!v.visible) && is_visible(n, t-1)) {
                         v_del[n.id] += ages[v.id][t-1];
                     }
-                }); 
+                });
             });
         }
 
@@ -334,7 +345,7 @@
                     if (v.visible && !(is_visible (n, t-1))) {
                         v_add[n.id] += ages[v.id][t-1];
                     }
-                }); 
+                });
             });
         }
 
@@ -342,7 +353,7 @@
             graph.adjList[n.id].forEach(function (v) { // should be the neigbours of n?
                     if (v.visible) { return true; }
             });
-            return false;    
+            return false;
         }
 
         // The start function is called once, when the layout is selected, or recomputed
@@ -355,7 +366,7 @@
             attractiveForce = function (dist) { return dist * dist / k; }
             max_displacement = layout.options.max_displacement;
             // putting the age in a matrix nodes X time
-            console.log("len" + graph.nodes.length);
+            // console.log("len" + graph.nodes.length);
             ages = Array2D(graph.nodes.length);
             graph.nodes.forEach(function(n) { ages[n.id][0] = 0});
             old_time = i9graph.animationTime;
@@ -396,30 +407,30 @@
             });
 
             if (i9graph.animationTime != old_time) {
-                console.log("animationTime " + i9graph.animationTime);
+                // console.log("animationTime " + i9graph.animationTime);
                 //calculate new age for every node
                 age_rem(graph, i9graph.animationTime);
                 age_del(graph, i9graph.animationTime);
 
                 age_add(graph, i9graph.animationTime);
-           
+
 
                 graph.nodes.forEach(function (n) {
                     if (n.visible) {
-                        console.log("n.visible : "+ n.visible);
+                        // console.log("n.visible : "+ n.visible);
                         if (has_neighbours(graph, n)) {
-                            console.log("use case 1");
+                            // console.log("use case 1");
                             var tot = rem[n.id] + del[n.id] + add[n.id];
-                            ages[n.id][i9graph.animationTime] = ages[n.id][old_time] * (rem[n.id]/tot) + 1; // round it?   
+                            ages[n.id][i9graph.animationTime] = ages[n.id][old_time] * (rem[n.id]/tot) + 1; // round it?
                         } else {
                             ages[n.id][i9graph.animationTime] = ages[n.id][old_time] + 1;
-                        }  
+                        }
                     } else {
                         ages[n.id][i9graph.animationTime] = ages[n.id][old_time];
                     }
                     n.age = ages[n.id][i9graph.animationTime];
 
-                   console.log("node "+n.id+" has age "+ n.age);  
+                   // console.log("node "+n.id+" has age "+ n.age);
                 });
                 old_time = i9graph.animationTime;
 

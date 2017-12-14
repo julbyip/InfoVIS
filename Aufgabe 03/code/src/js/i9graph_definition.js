@@ -17,8 +17,8 @@
      * @private
      */
     i9graph.i9g = {};
-    
-    
+
+
     /**
      * @function edge
      * @memberof i9graph
@@ -41,8 +41,8 @@
         this.visible = true;
         this.activity = [];  // list of {start:number,end:number}
     };
-    
-    
+
+
     /**
      * @function node
      * @memberof i9graph
@@ -69,10 +69,10 @@
          //for dynamic graphs
         this.visible = true;
         this.age    = 1;
-        this.activity = [];  // list of  {start:number,end:number}  
+        this.activity = [];  // list of  {start:number,end:number}
     };
-    
-    
+
+
     /**
      * @function graph
      * @memberof i9graph
@@ -110,8 +110,8 @@
             }
             return this.node_id_map[ n_id ];
         }
-        
-        this.addNode = function(n) {    
+
+        this.addNode = function(n) {
             n.id = this.setupNodeID( n.id );
             if( this.nodes[ n.id ] !== undefined){
                 //if nodes are labled with different lables,  show both
@@ -121,7 +121,7 @@
                         label_known=true; return;
                     }
                 });
-                if(!label_known) this.nodes[ n.id ].label += "|" + n.label;   
+                if(!label_known) this.nodes[ n.id ].label += "|" + n.label;
             }else{
                 this.nodes[n.id] = n;
                 var resList = [];
