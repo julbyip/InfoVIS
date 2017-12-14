@@ -114,7 +114,7 @@ if(graph_addon){
     i9graph.edgeSizeToSlider = function () { document.getElementById('edgesize').value = 80 + 10 * Math.log2(line_size); }
     i9graph.nodeSizeToSlider = function () { document.getElementById('nodesize').value = 10 + 10 * Math.log2(node_scale); }
     i9graph.edgeDetailToSlider = function () { document.getElementById('edgedetail').value = edge_strip_iterations; }
- 
+
     i9graph.resetRenderOptions = function () {
         edge_strip_iterations = 5;
         line_size = 0.006;
@@ -145,7 +145,7 @@ if(graph_addon){
             if(i9graph.animation_playing_in_loop) i9graph.animationTime += i9graph.i9g.end - i9graph.i9g.start;
             else                                  i9graph.animationTime = i9graph.i9g.start;
         }
-       
+
         i9graph.computedMeasures = {};
         i9graph.determineGraphVisibility( i9graph.i9g );
 
@@ -171,8 +171,8 @@ if(graph_addon){
     i9graph.animationTime = 0;
     i9graph.animationSpeed = 1;
     i9graph.animationFrame = 0;
-    i9graph.animationTimeFromSlider = function () { 
-        redrawAll(); 
+    i9graph.animationTimeFromSlider = function () {
+        redrawAll();
         i9graph.animationTime  = i9graph.i9g.start + (document.getElementById('animationtime').value/1000) * (i9graph.i9g.end-i9graph.i9g.start);
         timeChanged();
     }
@@ -195,7 +195,7 @@ if(graph_addon){
 
 
 
-   
+
 
     i9graph.addFileName = function (name) {
         if (!i9graph.appendFile) {
@@ -204,9 +204,9 @@ if(graph_addon){
         document.getElementById('Filename').innerHTML += (document.getElementById('Filename').innerHTML.length > 0 ? ' | ' : '') + name;
     }
 
-  
+
     var fpsNumber = 42;
-   
+
 
 
     (function (SHADER, undefined) {
@@ -215,7 +215,7 @@ if(graph_addon){
         SHADER.compile = function (name, vs_c, fs_c) {
             var vs = gl.createShader(gl.VERTEX_SHADER);
             gl.shaderSource(vs, vs_c);
-            gl.compileShader(vs);   
+            gl.compileShader(vs);
             var fs = gl.createShader(gl.FRAGMENT_SHADER);
             gl.shaderSource(fs, fs_c);
             gl.compileShader(fs);
@@ -252,7 +252,7 @@ if(graph_addon){
             if (precision == 32 && float) arr = new Float32Array(data);
             else if (precision == 32 && !float) arr = new Uint32Array(data);
             else if (precision == 16 && !float) arr = new Uint16Array(data);
-            else {  
+            else {
                 console.error("cannot create buffer with precision " + precision + " and float " + float);
                 return;
             }
@@ -487,7 +487,7 @@ if(graph_addon){
             if (empty.length > 0) {
                 t = empty.pop();
             } else {  //einen verdraengen
-                for (var i = 0; i < all.length; ++i) {  
+                for (var i = 0; i < all.length; ++i) {
                     var a = all[i];
                     if (a.size < size) {
                         map[a.textNode.nodeValue] = null;
@@ -549,6 +549,7 @@ if(graph_addon){
         this.vertices = new Float32Array(0);
         this.colors = new Float32Array(0);
         this.indices = new Uint32Array(0);
+        this.visible = new Array(0);
         this.edge_strips = new Float32Array(0);
         this.edge_strip_colors = new Float32Array(0);
         this.N = -1;
@@ -576,6 +577,8 @@ if(graph_addon){
             G.indices = new Uint32Array(2 * edgelen);       //src,dst
             G.edge_strips = new Float32Array(3 * edgelen * points_per_edge);      //x,y, sidecoord (in [0,line_size])
             G.edge_strip_colors = new Float32Array(3 * edgelen * points_per_edge);      //r,g,b
+
+            G.visible = new Array(edgelen).fill(true);
 
             G.edgeInvalid = new Array(edgelen).fill(true);
             G.neighbouringEdges = new Array(nodelen).fill(null).map(() => []);
@@ -619,8 +622,9 @@ if(graph_addon){
 
         this.setEdge = function (id, e) {
             G.addonEdgesInvalid = true;
-            G.indices[2 * id + 0] = e.visible?e.src:-1;
-            G.indices[2 * id + 1] = e.visible?e.dst:-1;
+            G.indices[2 * id + 0] = e.visible?e.src:0;
+            G.indices[2 * id + 1] = e.visible?e.dst:0;
+            G.visible[id] = e.visible;
             G.edgeInvalid[ id ] = true;
             G.edgesInvalid++;
 
@@ -722,7 +726,7 @@ if(graph_addon){
             var ex = G.indices[2 * TID + 0];
             var ey = G.indices[2 * TID + 1];
 
-          
+
 
             var extend = .5;
             var points_per_edge = 2 + 2 * (2 + (1 << edge_strip_iterations));
@@ -751,7 +755,7 @@ if(graph_addon){
             var r0 = from[2];
             var points = (points_per_edge - 4) / 2;
 
-            if(ex==-1 || ey==-1){   //edge hidden
+            if( !G.visible[ TID ] ){   //edge hidden
                 for (var i = 0; i < 2*points+4; ++i) EMIT(from3, from_color);
             }else if (ex == ey) {   //pointing to self
                 //i.e. partial circle at bottom right corner of node
@@ -815,7 +819,7 @@ if(graph_addon){
 
     BUFFER.create('quad', [0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 1, 0], 3);
 
-   
+
 
     i9graph.clearGraph = function () {
         i9graph.i9g = new i9graph.graph;
@@ -945,7 +949,7 @@ if(graph_addon){
     }
 
 
-    
+
 
     i9graph.getNodeColor = function (n) { return n.measure[i9graph.color_measure]; }
     i9graph.getNodeSort = function (n) { return n.measure[i9graph.sort_measure]; }
@@ -953,24 +957,24 @@ if(graph_addon){
 
 
 
-    i9graph.setColorMeasure = function (name) { 
-        i9graph.color_measure = name; 
-        update_node_properties(); 
+    i9graph.setColorMeasure = function (name) {
+        i9graph.color_measure = name;
+        update_node_properties();
         redrawAll();
         i9graph.setupDropdowns();
     }
 
-    i9graph.setSizeMeasure = function (name) { 
-        i9graph.size_measure = name; 
-        update_node_properties(); 
+    i9graph.setSizeMeasure = function (name) {
+        i9graph.size_measure = name;
+        update_node_properties();
         redrawAll();
         i9graph.setupDropdowns();
     }
 
-    i9graph.setSortMeasure = function (name) { 
-        i9graph.sort_measure = name; 
-        update_node_properties(); 
-        redrawAll(); 
+    i9graph.setSortMeasure = function (name) {
+        i9graph.sort_measure = name;
+        update_node_properties();
+        redrawAll();
         i9graph.setupDropdowns();
     }
 
@@ -1021,7 +1025,7 @@ if(graph_addon){
     i9graph.setInspectorForSelectedNode = function( n ){
         var B = document.getElementById("inspector-body");
         if(!n){
-            B.innerHTML = "<h4>Select Any Node</h4>";            
+            B.innerHTML = "<h4>Select Any Node</h4>";
         }else{
             B.innerHTML = "<h3>["+n.id+"] '"+n.label+"' </h3>"
             B.innerHTML += "<h4>Measurements:</h4>"
@@ -1078,7 +1082,7 @@ if(graph_addon){
         B.innerHTML = "";//"<h4>Measurements:</h4>"
         for(var c in i9graph.computedMeasures){
             var a = c.split('.');
-            
+
             var html = "<a class='inline'"
                 +" href=\"#\""
                 +" data-toggle='tooltip' title='set Color by "+c+"'"
@@ -1093,16 +1097,16 @@ if(graph_addon){
                 +" style='color:#"+(i9graph.sort_measure==c?'991111':'111111')+"'"
                 +"onclick='i9graph.setSortMeasure(\""+c+"\");'> 123</a>"
                 +"<br>";
-            
+
             if(a[0]=='community') comm += html;
             else if(a[0]=='centrality') centr += html;
         }
 
-        
+
         if(centr.length>0) B.innerHTML += '<h5>Appearence by Centrality:</h5>'+centr;
         if(comm.length>0) B.innerHTML += '<h5>Community:</h5>'+comm;
 
-        
+
         var lo = i9graph.layout[i9graph.current_layout];
 
         var str = "";
@@ -1429,7 +1433,7 @@ gl_FragColor = vec4(color, .6*transparency) * min(1.,min(side_coord,neg_side));
 
             if (id != N && id != pointed_object) {    //point to new object
                 if (pointed_object != -1) {
-                    //request simple text for old    
+                    //request simple text for old
                     request_text_for_node(pointed_object);
                     //neighbouring_edges.forEach((e) => { request_text_for_edge(e, 1., false); });
                 }
@@ -1634,4 +1638,3 @@ gl_FragColor = vec4(color, .6*transparency) * min(1.,min(side_coord,neg_side));
 
     /** end namespace i9graph*/
 })(window.i9graph = window.i9graph || {});
-
