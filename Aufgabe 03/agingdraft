@@ -1,0 +1,34 @@
+aging - paper
+
+method:
+
+
+genereal aproch:
+- Foundation is a standart force-directed model
+- modify it to link the physical drag
+experienced by a node to its current age, and generate
+animated layouts that ensure evolutionarily stable regions
+also maintain relatively stable positions in space.
+
+=== Force directed Layout ===
+- force-directed layout where forces take a form suggested by Frishman and Tal
+	* simple model
+	* position a randommly initalzed
+	* ensures a fixed stable state
+	
+=== Network Aging ===
+- each node and edge  has an age a_i(t) (nodes) and a_ij(t)(edges) element R+
+- they age at time t is related to the number of evolutionary steps since any connected elements were  last updated
+- age quantifies stability of a node/edge
+- initial age of node/edge 1
+- age updated after every evolutionary step
+- For nodes that have seen no local changes, the age is simply incremented by 1. However, if changes have occurred, the age of the node is first reduced by a fraction
+related to the age of the newly connected and removed nodes, as well as the total age of adjacent unaffected node. By using information from the neighborhood of a node, we
+are able to ensure that historic aging information is not completely lost after small updates to highly connected regions
+- Edged: only possible  change being the removal of at least one connected node. This will result in removal of the edge itself and therefore this case need not be considered. All remaining edges are aged after each evolutionary step using by increasing the old age by one.
+
+
+=== Age directed Layout Model ===
+- alteration of force-directed layout using ages of nodes/edges to alter characteristics of the pysical model/ rendering
+- older nodes should be more stable parts of the network (they function as visable markers)
+
