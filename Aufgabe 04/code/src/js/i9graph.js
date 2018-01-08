@@ -294,6 +294,10 @@
                     var w = nw.id;
                     if(w == v) return;
 
+                    if(min_distance[w.id] == 0) {/* w is not visted */  
+                        Q.insert({key: 1, node: w.id});
+                        min_distance[w.id] = 1;
+                    }        
                     // TODO::
                     //   if the node  w  has not been visited:
                     //   insert it into the  Q  (with the  correct priority-key)
@@ -341,8 +345,8 @@
     }
 
     
-    
-    
+   
+
     /**
      * @function eigenvector
      * @memberof i9graph.centrality
@@ -362,22 +366,51 @@
         // using Power Iteration
 
         var N = graph.nodes.length;
+        console.log("N "+N);
         var B = new Array(N).fill(1);
         var previous_error = Number.MAX_VALUE;
 
         for (var iter = 0; iter < 100; iter++) { // 100 iterations
 
             var T = new Array(N).fill(0);
- 
-            //TODO:  T[i]  =  sum of all  B[j]  where  node j is neighbour of node i
 
-            //TODO:  normalize  T
+            //DONE:  T[i]  =  sum of all  B[j]  where  node j is neighbour of node i
+            graph.nodes.forEach(function(n){
+                var sum = 0;
+                graph.adjList[n.id].forEach(function(j){
+                    sum += B[j.id];
+                });  
+                T[n.id] = sum;
+                console.log("T["+n.id+"] = "+T[n.id]);
 
+            });
+
+            //DONE:  normalize  T
+            var min = Number.POSITIVE_INFINITY;
+            var max = 0;
+            var res = new Array(len).fill(0);
+
+            for(var i = 0; i < N; i++){
+                if(T[i] < min) {
+                    min = T[i];
+                }
+                if(T[i] > max) {
+                    max = T[i];
+                }
+            }
+            for(var j = 0; j < N; j++){
+                T[j] = (T[j] - min) / (max - min);
+            }
 
             var error = 0;
-            //TODO:  compute the  'error' (see: power iteration)
+            // DONE 'error' (see: power iteration)
+            // use avergae difference from last to current result as error
+            graph.nodes.forEach(function(n){
+                error += Math.abs(B[n.id] - T[n.id]);    
+            });
+            error /= N;
 
-        
+            console.log("error = "+error);
             // abort, when error is increasing, or error is 'small'
             if (error < 0.05 || error > previous_error) {
                 if (error < previous_error) B = T;
@@ -437,13 +470,27 @@
                 rank_out[ i ] = inv_d;
             });
 
-            // TODO::  distribute the rank_in of every node equally to the rank_out of its successors
+            // DONE::  distribute the rank_in of every node equally to the rank_out of its successors
             //    weight this amount by the dumping_factor, to not increase the overall rank
 
 
+            graph.nodes.forEach(function(n, i){
+               // find succesors 
+               var num_succ = graph.adjList[n.id].length;
+               var div = rank_in[i] / num_succ;
+               graph.adjList[n.id].forEach(function(m, j){
+                    /* maybe check if its a succesor ???*/
+                    rank_out[j] = d * div;
+               });
+            });
+
 
             var error = 0;
-            // TODO:: compute error
+            // DONE:: compute error
+             graph.nodes.forEach(function(n){
+                    error += Math.abs(rank_in[n.id] - rank_out[n.id]);    
+            });
+            error /= N;
 
 
 
