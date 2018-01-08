@@ -247,7 +247,9 @@
 
 
 
-
+    function sum(acc, n) {
+        return acc + n;
+    }
 
      /**
      * @function betweenness
@@ -294,35 +296,42 @@
                     var w = nw.id;
                     if(w == v) return;
 
-                    if(min_distance[w.id] == 0) {/* w is not visted */  
-                        Q.insert({key: 1, node: w.id});
-                        min_distance[w.id] = 1;
-                    }        
-                    // TODO::
+                    // DONE::
                     //   if the node  w  has not been visited:
                     //   insert it into the  Q  (with the  correct priority-key)
                     //   and mark it as visited (i.e.  set its min_distance)
+                    if(min_distance[w] == -1) {/* w is not visted */
+                        Q.insert({key: 1, node: w});
+                        min_distance[w] = min_distance[v] + 1;
+
+                    }        
+                   
 
 
-                    //TODO:
+                    //DONE:
                     //    if the current path to  w  is a shortest Path:
                     //    update the numberOfShortestPaths   to w
                     //    and add   v  to the collection of   nodesOnShortestPath   of  w
-
-
+                    if (nodesOnShortestPath[w] >= min_distance[w]) {
+                        numberOfShortestPaths[v]++;
+                        nodesOnShortestPath[w].push(v);
+                    }
                 });
             }
 
             var current_centrality  =  new Array( N ).fill(0); 
             // visit every node   in   'reverse breadth first'   order   (so current_centrality  is  0  for farest, then 1,2,3 etc.  (but scaled with path-percentage))
             while (stack.length > 0) {  
-                var w = stack.pop();    
+                var w = stack.pop();  
+
+                var total_paths = numberOfShortestPaths.reduce(sum, 0);
                 
                 // for every node  v  where    ( n --> v -> w )   is a shortest path  (n --> w)
                 nodesOnShortestPath[ w ].forEach(function (v) {
+                    current_centrality[v] += ((current_centrality[w] + 1)  * (numberOfShortestPaths[v] / total_paths));
 
                     //TODO::  sum up the current_centrality values for each node  v   on the shortest Path of   n to w
-                    //  therefor::
+                    //  therefore::
                     //        increment  the current_centrality of v  
                     //        by the   (current_centrality of w)  +  1 
                     //        scaled by the  percentage of   paths that go over  v    
