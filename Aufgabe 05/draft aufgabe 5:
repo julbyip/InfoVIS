@@ -1,0 +1,58 @@
+draft aufgabe 5:
+
+++++++++++++++++++++++++Goals:++++++++++++++++++++++++++++++++++
+
++++++Legibility++++
+the main idea behind a stacked graph follows Tufte’s macro/
+micro principle [16]: the twin goals are to show many individual
+time series, while also conveying their sum. Since the heights of the
+individual layers add up to the height of the overall graph, it is pos-
+sible to satisfy both goals at once.
+
+	* no spaces between layers -> change in a layer cause change in surronding layer with are not concernd by the changed data
+	* Two layers of the same vertical height but with different slopes may appear to have radically different thicknesses --> makes it hard to compare
+	+ tradeoff between having the graph to spiky versus the single layers to flat
+	* A third issue is the ability of a reader to distinguish effectively the many layers of a stacked graph
+
+	==> all in all hard to read/compare
+
+++++++Aesthetics++++++
+Should also be pleasing to look at, but:
+some of the aesthetically pleasing—or at least
+engaging—qualities may be in conflict with the need for legibility, what sould be weightes more also depends on the audience.
+
+++++++++++++++++++++++++++++++Strategies++++++++++++++++++++++++++
+
+
++++++++=A lgorithms for S tacked G raph D esign
+There are four main ingredients that determine a generalized stacked graph.
++ shape of overall shilouete 
+he thickness of
+the overall stack reflects the sum of the individual time series. Given
+this constraint, the overall geometry of the stacked graph is deter-
+mined by two factors: the shape of the “baseline,” or bottom of the
+lowest layer, and the order of the layers.
+
++  color choice
+choosing a color scheme is highly dependent on the underlying data as well as the context in
+which it will be presented beacause: 
+Although
+color is an opportunity to communicate additional data, strong or
+jarring colors become visually distracting and make the graphic
+hard to read. At the same time, there must be enough local contrast
+between layers in order to differentiate each layer, a particularly
+important issue as raised in design issue (E). The design problem is
+complicated by the need to balance these perceptual considerations
+with aesthetic ones which stem from design issue 
++ labels 
+
+Stacked graphs with a small number of layers
+do not necessarily need labels for the layers, since a legend and color
+coding scheme may be appropriate
+Ideally a label is visually associ-
+ated with the data it represents, will not overlap other labels or layers,
+and will not distract from the rest of the graphic.
+
++ ordering of the layers
+If there is no intrinsic ordering, he ordering can be chosen to enhance
+legibility or to make a better-looking graph. also this wat the disadvangtes of others aspects that reduced for example the legbillityof the graph can be meet.
